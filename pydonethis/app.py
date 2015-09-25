@@ -146,7 +146,7 @@ class PDTTextOutputHandler(output.CementOutputHandler):
 
     def render(self, data, template):
         for done in data:
-            print "{}: {}".format(done.id, done.text)
+            print u"{}: {}".format(done.id, done.text)
 
 
 class PDTApp(foundation.CementApp):
