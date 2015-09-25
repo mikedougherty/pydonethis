@@ -88,7 +88,7 @@ class PDTDoneController(controller.CementBaseController, ClientMixin):
             (['task'], dict(nargs='*', help='Something you\'ve finished')),
         ]
 
-    @controller.expose(help="Post a done")
+    @controller.expose(help="Add or update a task/goal")
     def done(self):
         self.validate_token()
         task_text = ' '.join(self.app.pargs.task)
@@ -97,7 +97,7 @@ class PDTDoneController(controller.CementBaseController, ClientMixin):
         if done is None:
             self.app.render([self.create_done(task_text)])
         else:
-            if done.goal_completed or not done.is_goal:
+            if done.goal_completed or not done.is_goal or not task_text:
                 # Nothing to do
                 self.app.close(1)
             else:
@@ -105,7 +105,7 @@ class PDTDoneController(controller.CementBaseController, ClientMixin):
                 done.goal_completed = True
                 self.app.render([self.update_done(done)])
 
-    @controller.expose(help="Add a todo")
+    @controller.expose(help="Add a goal")
     def todo(self):
         self.app.pargs.task.insert(0, '[]')
         self.done()
@@ -121,7 +121,7 @@ class PDTDoneController(controller.CementBaseController, ClientMixin):
 class PDTListController(controller.CementBaseController, ClientMixin):
     class Meta:
         label = 'list'
-        description = "List dones"
+        description = "List tasks and goals"
         arguments = [
             (['-d', '--done-date'], dict(action='store', metavar='DATE', help='Specify a date (YYYY-MM-DD, "today", or "yesterday")')),
             (['--done-date-before'], dict(action='store', metavar='DONE_BEFORE', help='Show things done before YYYY-MM-DD.')),
