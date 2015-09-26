@@ -54,11 +54,10 @@ class ClientMixin(object):
             dones = c.dones(**done_filters)
 
         for done in dones:
-            if self.app.pargs.todo or self.app.pargs.done:
-                if done.is_goal and self.app.pargs.todo and done.goal_completed:
-                    continue
-                if self.app.pargs.done and not done.goal_completed:
-                    continue
+            if self.app.pargs.todo and done.goal_completed:
+                continue
+            if self.app.pargs.done and not done.goal_completed:
+                continue
 
             yield done
 
