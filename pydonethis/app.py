@@ -55,9 +55,7 @@ class ClientMixin(object):
 
         for done in dones:
             if self.app.pargs.todo or self.app.pargs.done:
-                if not done.is_goal:
-                    continue
-                if self.app.pargs.todo and done.goal_completed:
+                if done.is_goal and self.app.pargs.todo and done.goal_completed:
                     continue
                 if self.app.pargs.done and not done.goal_completed:
                     continue
@@ -131,7 +129,7 @@ class PDTListController(controller.CementBaseController, ClientMixin):
             (['--tags'], dict(action='store', metavar='TAGS', help='Show things matching TAGS (comma-separated list, e.g. tag1,tag2)')),
             (['--owner'], dict(action='store', metavar='OWNER', help='Only show tasks by OWNER')),
             (['--todo'], dict(action='store_true', help='Only show incomplete goals')),
-            (['--done'], dict(action='store_true', help='Only show completed goals')),
+            (['--done'], dict(action='store_true', help='Only show dones and completed goals')),
         ]
 
     @controller.expose(help="List dones")
