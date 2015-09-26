@@ -7,7 +7,8 @@ import urlparse
 import requests
 import requests.auth
 
-import pydonethis.model
+from .model import Team, Done
+
 
 class IDoneThisException(Exception):
     def __init__(self, detail='', **kwargs):
@@ -16,22 +17,22 @@ class IDoneThisException(Exception):
         self.__dict__.update(kwargs)
 
 
-def paginated(f):
-    @functools.wraps(f)
+def paginated(func):
+    @functools.wraps(func)
     def wrapper(*args, **kwargs):
         kwargs.setdefault('page_size', 100)
         kwargs.setdefault('page', 1)
         kwargs.setdefault('order_by', None)
-        return f(*args, **kwargs)
+        return func(*args, **kwargs)
     return wrapper
 
 
 def model(cls):
-    def decorator(f):
-        @functools.wraps(f)
+    def decorator(func):
+        @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            result = f(*args, **kwargs)
-            if type(result) is PaginatedResponse:
+            result = func(*args, **kwargs)
+            if isinstance(result, PaginatedResponse):
                 return ModelIterator(cls, result)
             else:
                 return cls.from_dict(result)
@@ -87,32 +88,32 @@ class IDoneThisClient(requests.Session):
     def noop(self):
         return self.get('noop/')
 
-    @model(pydonethis.model.Team)
+    @model(Team)
     def team(self, team):
         return self.get('teams/%s/' % team)
 
-    @model(pydonethis.model.Team)
+    @model(Team)
     @paginated
     def teams(self, **params):
         return self.get('teams/', params=params)
 
-    @model(pydonethis.model.Done)
+    @model(Done)
     def done(self, done):
         return self.get('dones/%s/' % done)
 
-    @model(pydonethis.model.Done)
+    @model(Done)
     @paginated
     def dones(self, **params):
         return self.get('dones/', params=params)
 
-    @model(pydonethis.model.Done)
+    @model(Done)
     def create_done(self, text, team):
         return self.post(
             'dones/',
             json=dict(raw_text=text, team=team.short_name)
         )
 
-    @model(pydonethis.model.Done)
+    @model(Done)
     def update_done(self, done):
         return self.patch(
             'dones/%s/' % done,
@@ -178,6 +179,7 @@ class PaginatedResponse(object):
                     yield item
             else:
                 yield response
+
 
 class ModelIterator(PaginatedResponse):
     def __init__(self, cls, response):

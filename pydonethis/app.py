@@ -3,7 +3,7 @@ import os
 from pydonethis import VERSION
 from pydonethis.api import IDoneThisClient
 
-from cement.core import foundation, handler, output, controller, hook
+from cement.core import foundation, output, controller
 from cement.utils.misc import init_defaults
 
 
