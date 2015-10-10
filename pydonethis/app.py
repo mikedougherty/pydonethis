@@ -91,19 +91,27 @@ class PDTDoneController(controller.CementBaseController, ClientMixin):
         task_text = ' '.join(self.app.pargs.task)
 
         done = self.get_done()
-        if done is None:
-            self.app.render([self.create_done(task_text)])
+
+        if done is None and not task_text:
+            return self.app.close(1)
+
+        if done is not None and (done.goal_completed or not done.is_goal):
+            return self.app.close(1)
+
+        if done:
+            done.raw_text = '[x]' + (task_text or done.raw_text.replace('[]', '', 1))
+            done.goal_completed = True
+            updated_done = self.update_done(done)
         else:
-            if done.goal_completed or not done.is_goal:
-                # Nothing to do
-                self.app.close(1)
-            else:
-                done.raw_text = '[x]' + (task_text or done.raw_text.replace('[]', '', 1))
-                done.goal_completed = True
-                self.app.render([self.update_done(done)])
+            updated_done = self.create_done(task_text)
+
+        self.app.render([updated_done])
 
     @controller.expose(help="Add a goal")
     def todo(self):
+        if not self.app.pargs.task:
+            return self.app.close(1)
+
         self.app.pargs.task.insert(0, '[]')
         self.done()
 
@@ -112,6 +120,9 @@ class PDTDoneController(controller.CementBaseController, ClientMixin):
             return c.update_done(done)
 
     def create_done(self, text):
+        if not text:
+            return self.app.close(1)
+
         with self.client() as c:
             return c.create_done(text, self.get_team())
 
