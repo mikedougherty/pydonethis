@@ -94,7 +94,7 @@ class PDTDoneController(controller.CementBaseController, ClientMixin):
         if done is None:
             self.app.render([self.create_done(task_text)])
         else:
-            if done.goal_completed or not done.is_goal or not task_text:
+            if done.goal_completed or not done.is_goal:
                 # Nothing to do
                 self.app.close(1)
             else:
